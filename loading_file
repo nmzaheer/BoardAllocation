@@ -1,0 +1,10 @@
+#!/bin/sh
+
+#pkill -f 'gdbserver :'$2
+ftpget -u mts0 -p pass0 192.168.15.40 $3 $1
+echo "FTP Transfer Complete"
+echo $3
+chmod +x $3
+echo "File Permission Changed"
+echo "Starting GDBServer on $2"
+gdbserver :$2 ./$3

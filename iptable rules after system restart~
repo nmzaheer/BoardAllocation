@@ -1,0 +1,11 @@
+iptables -I INPUT 06 -m state --state NEW -p tcp --dport 5475 -j ACCEPT
+iptables -A INPUT -p tcp --sport 5475 -j ACCEPT
+iptables -A OUTPUT -p tcp --dport 5475 -j ACCEPT
+iptables -t nat -A POSTROUTING -o eth1 -j MASQUERADE
+iptables -I FORWARD 02 -i eth0 -j ACCEPT
+iptables -I FORWARD 03 -o eth0 -j ACCEPT
+
+
+
+
+
