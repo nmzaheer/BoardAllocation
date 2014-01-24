@@ -1,5 +1,6 @@
-var express = require("express");
 var fs = require("fs");
+var express = require('express');
+var database = require('./database');
 var app = express();
 
 app.configure(function(){
@@ -7,30 +8,31 @@ app.configure(function(){
 });
 
 app.use(express.static(__dirname + '/'));
+app.use(express.logger());
 
-app.post('/a',function(req,res){
-	var userid = req.body.userid;
-	var portno = req.body.portno;
-	var collip = req.headers['x-forwarded-for'].split(', ')[0];
-	console.log(collip);
-	console.log(userid);
-console.log(portno);
-console.log(req.files.objfile.size);
-fs.readFile(req.files.objfile.path,function(err,data){
-		var newPath = "/tftpboot/"+collip+userid+portno;
-
+app.post('/allocate',function(req,res){
+	var info = {};
+	info['userid'] = req.body.userid;
+	info['collip'] = req.headers['x-forwarded-for'].split(', ')[0] || req.connection.remoteAddress;
+	info['srcport'] = req.body.portno;
+	info['filename'] = info['userid'] + info['collip'] + info['srcport'];
+	fs.readFile(req.files.objfile.path,function(err,data){
+		var newPath = "/tftpboot/"+info['filename'];
 		fs.writeFile(newPath, data, function (err) {
-			if(err)
-			{
+			if(err){
 				console.log(err);
 				res.send("Failure ....");
 			}
-			else
-			    res.send("File transfer successful!!!!!!");
-			    var dbcheck = require("./db2");
-				dbcheck.dbchecking(userid,collip,collip+userid+portno,portno);
-			});
+			else{
+				database.checkdb(info,function(port){
+					res.write("You were allocated the following port : "+ port+"\n");
+					res.write("OK...");
+					res.write("Bye");
+					res.end();
+				});
+			}
+		});
 	});
 });
 app.listen(8080);
-console.log('Express server started on port %s', app.listen().address());
+console.log('Express server started on port %s', app.listen().address().port);
