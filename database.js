@@ -3,6 +3,8 @@
 function checkdb(input,callback) {
 
 	var mysql = require('mysql');
+	var file = require("./load");
+	var ipfwd = require("./fwd");
 	var auth = {user : 'adi', password : 'adi123'};
 	var query = {};
 	query['check_user'] = "select count(*) as count from b_mng.b_status where userid='"+input['userid']+"' and collegeip='"+input['collip']+"';";
@@ -24,33 +26,37 @@ function checkdb(input,callback) {
 					res.send('You are already logged on,try after exiting the previous session');				
 				else
 					BoardQuery(connection, query['free_board'], function(board)	{
-						temp = "select boardip,min(portno) as portno from b_mng.b_status where logged=0 and working=1 and 	boardip='"+board+"' LIMIT 1;";
+						temp = "select boardip,min(portno) as portno from b_mng.b_status where logged=0 and working=1 and boardip='"+board+"' LIMIT 1;";
 						info['boardip'] = board;
 						FindBoardQuery(connection, temp, function(port)	{
 							info['portno'] = port;
 							temp = "update b_mng.b_status set logged=1,userid='"+input['userid']+"',collegeip='"+input['collip']+"',intime=now() where boardip='"+board+"' and portno="+port+" and logged=0;"
 							UpdateTableQuery(connection, temp, function()	{
-								// TODO Load file and update IP tables
-								// TODO Cleaning up and killing processes have to be written
+								temp = "select date_format(Intime,'%Y-%m-%d %T') as time1 from b_mng.b_status where boardip='"+board+"' and portno="+port+";";
+								GetIntimeQuery(connection, temp, function(intime)	{
+									info['intime'] = intime;
+									file.load(connection, info, input, function()	{
+										//TODO
+									});
+									ipfwd.add(info, input, function(){
+										///TODO
+									});
+								});
 							});
-							callback(port);
 						});
-						
 					});
+			callback();
 			});
 	});
 }
 
 function UserQuery(connection, query, callback)	{
-	var info = {};
 	connection.query(query, function(err, rows) { 
 		if(err != null)
 			console.log("Query error:" + err);
-		else	{
+		else
 			if(rows[0]['count']!=0)
-				info['db_code'] = 2;
-		}
-	callback(info);
+				callback(2);
 	});			
 }
 
@@ -58,10 +64,8 @@ function BoardQuery(connection, query, callback)	{
 	connection.query(query, function(err, rows)	{
 		if(err != null)
 			console.log("Query error:" + err);
-		else	{
-			boardip = rows[0]['boardip'];
-		}
-	callback(boardip);
+		else
+			callback(rows[0]['boardip']);
 	});			
 }
 
@@ -73,9 +77,9 @@ function FindBoardQuery(connection, query, callback)	{
 		else	{
 			if(rows[0]['boardip']!= null)	{	
 				console.log(rows[0]['portno']);
+				callback(rows[0]['portno']);
 			}
 		}
-		callback(rows[0]['portno']);
 	});			
 }
 
@@ -94,4 +98,12 @@ function UpdateTableQuery(connection, query, callback)	{
 	});			
 }
 
+function GetIntimeQuery(connection, query, callback)	{
+	connection.query(query, function(err, res)	{
+		if(err != null)
+			console.log("Query error:" + err); 
+		else
+			callback(res[0]['time1']);
+	});			
+}
 exports.checkdb = checkdb;
