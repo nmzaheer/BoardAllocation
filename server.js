@@ -12,22 +12,22 @@ app.use(express.logger());
 
 app.post('/allocate',function(req,res){
 	var info = {};
-	info['userid'] = req.body.userid;
-	info['collip'] = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-	info['srcport'] = req.body.portno;
-	info['filename'] = info['userid'] + info['collip'] + info['srcport'];
+	info.userid = req.body.userid;
+	info.collip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+	info.srcport = req.body.portno;
+	info.filename = info.userid + info.collip + info.srcport;
 	fs.readFile(req.files.objfile.path,function(err,data){
-		var newPath = "/tftpboot/"+info['filename'];
+		var newPath = "/tftpboot/"+info.filename;
 		fs.writeFile(newPath, data, function (err) {
 			if(err){
 				console.log(err);
 				res.send("Failure ....");
 			}
 			else{
-				database.checkdb(info,function(port){
-					res.write("You were allocated the following port : "+ port+"\n");
-					res.write("OK...");
-					res.write("Bye");
+				database.checkdb(info,function(status){
+					res.write(status+"\n");
+					res.write("OK...\n");
+					res.write("Bye...");
 					res.end();
 				});
 			}
