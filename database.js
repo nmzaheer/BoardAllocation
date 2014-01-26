@@ -5,7 +5,7 @@ function checkdb(input,callback) {
 	var mysql = require('mysql');
 	var file = require("./load");
 	var ipfwd = require("./fwd");
-	var auth = {user : 'adi', password : 'adi123'};
+	var auth = {host : 'localhost', user : 'adi', password : 'adi123', database:'b_mng'};
 	var query = {};
 	query['check_user'] = "select count(*) as count from b_mng.b_status where userid='"+input['userid']+"' and collegeip='"+input['collip']+"';";
 	query['free_board'] = "select boardip from b_mng.b_status where working=1 group by boardip order by sum(logged),boardip LIMIT 1;";

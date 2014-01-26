@@ -13,7 +13,7 @@ app.use(express.logger());
 app.post('/allocate',function(req,res){
 	var info = {};
 	info['userid'] = req.body.userid;
-	info['collip'] = req.headers['x-forwarded-for'].split(', ')[0] || req.connection.remoteAddress;
+	info['collip'] = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 	info['srcport'] = req.body.portno;
 	info['filename'] = info['userid'] + info['collip'] + info['srcport'];
 	fs.readFile(req.files.objfile.path,function(err,data){
@@ -34,5 +34,5 @@ app.post('/allocate',function(req,res){
 		});
 	});
 });
-app.listen(5475);
+app.listen(3990);
 console.log('Express server started on port %s', app.listen().address().port);
