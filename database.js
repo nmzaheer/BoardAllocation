@@ -2,6 +2,11 @@
 
 function checkdb(input,callback) {
 
+//TODO Change messages to decent ones....
+//TODO Write conditions for GDB termination
+//TODO Unlink when boards are busy or user is already logged on or database connection error
+//TODO write unit tests (Mohan - Test Engineer)
+
 	var mysql = require('mysql')
 	,   file = require("./load")
 	,   ipfwd = require("./fwd")
