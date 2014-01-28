@@ -6,13 +6,11 @@ function ftransfer(connection, info, input){
 	,   ipfwd = require("./fwd")
 	,   spawn = require('child_process').spawn
 	,   echo_cmd ='./loading_file '+input.filename+' '+info.portno+' '+'obj'+info.portno+"\n"
-	,		nc_cmd = info.boardip+" "+ncport
 	,   ls = spawn('nc', [info.boardip, ncport])
 	,   id = setTimeout(function(){
                 var gdb_portno='\'gdbserver :'+info.portno+'\''
                 ,   spawn = require('child_process').spawn
                 ,   pkill_cmd = 'pkill '+'-f '+'-o '+gdb_portno+"\n"
-                ,   fs = require('fs')
                 ,   kill= spawn('nc', [info.boardip, ncport]);
 		kill.stdin.write(pkill_cmd);
                 kill.stdout.on('data', function (data) {
@@ -41,7 +39,7 @@ function ftransfer(connection, info, input){
 		clearTimeout(id);
 		ipfwd.drop(input,info);
 		fs.unlink('/tftpboot/'+input.filename, function (err) {
-            if (err !=null && err.code != 'ENOENT') console.log(err);
+            if (err !==null && err.code != 'ENOENT') console.log(err);
             console.log('successfully deleted'+input.filename);
 		});
     });
