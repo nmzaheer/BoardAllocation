@@ -51,12 +51,15 @@ function checkdb(input,callback) {
 }
 
 function UserQuery(connection, query, callback)	{
-	connection.query(query, function(err, rows) { 
-		if(err !== null)
-			callback(0);
-		else
+	connection.query(query, function(err, rows) {
+		if(err !== null){
+			callback(0);}
+		else{
 			if(rows[0].count!==0)
 				callback(2);
+			else 
+				callback(1);
+		}
 	});			
 }
 
@@ -75,8 +78,7 @@ function FindBoardQuery(connection, query, callback)	{
 			callback(err, 0);
 		} 
 		else	{
-			if(rows[0].boardip!== null)	{	
-				console.log(rows[0].portno);
+			if(rows[0].boardip!== null)	{
 				callback(err, rows[0].portno);
 			}
 		}

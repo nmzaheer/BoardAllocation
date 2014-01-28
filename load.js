@@ -1,47 +1,47 @@
 
 function ftransfer(connection, info, input){ 
-		
+
 	var ncport = 56789
 	,   fs = require("fs")
 	,   ipfwd = require("./fwd")
 	,   spawn = require('child_process').spawn
-    ,   echo_cmd ='"./loading_file '+input.filename+' '+input.portno+' '+'obj'+input.portno+'"'
-    ,   nc_cmd = "nc "+info.boardip+" "+ncport
-	,   ls = spawn('echo', [echo_cmd, " | ", nc_cmd])
+	,   echo_cmd ='./loading_file '+input.filename+' '+info.portno+' '+'obj'+info.portno+"\n"
+	,		nc_cmd = info.boardip+" "+ncport
+	,   ls = spawn('nc', [info.boardip, ncport])
 	,   id = setTimeout(function(){
                 var gdb_portno='\'gdbserver :'+info.portno+'\''
                 ,   spawn = require('child_process').spawn
-                ,   pkill_cmd = 'pkill '+'-f '+'-o '+gdb_portno
+                ,   pkill_cmd = 'pkill '+'-f '+'-o '+gdb_portno+"\n"
                 ,   fs = require('fs')
-                ,   kill= spawn('echo', [pkill_cmd , " | ", nc_cmd]);
+                ,   kill= spawn('nc', [info.boardip, ncport]);
+		kill.stdin.write(pkill_cmd);
                 kill.stdout.on('data', function (data) {
                     console.log("stdout:"+data);
                 });
                 kill.stderr.on('data', function (data) {
                     console.log('stderr: ' + data);
                 });
-                connection.release();
-                ipfwd.drop(input,info);
-                fs.unlink('/tftpboot/'+input.filename, function (err) {
-                    if (err) throw err;
-                    console.log('Successfully deleted '+input.filename);
-                });
-	}, 300000);
+		kill.stdin.end();
+		
+	}, 10000);
+	ls.stdin.write(echo_cmd);
 	ls.stdout.on('data', function (data) {
         console.log("stdout:"+data);
+	if(data == 'TERM\n') ls.kill('SIGHUP');
 	});
 	ls.stderr.on('data', function (data) {
 		console.log('stderr: ' + data);
 	});
+
 	ls.on('close', function (code) {
 		connection.query("update b_mng.b_status set logged=0,userid=NULL,collegeip=NULL,intime=NULL where boardip='"+info.boardip+"' and portno="+info.portno+";", function(err,res){
 			if(err!==null)   console.log(err);
+			connection.release();
 		});
 		clearTimeout(id);
-		connection.release();
 		ipfwd.drop(input,info);
 		fs.unlink('/tftpboot/'+input.filename, function (err) {
-            if (err) throw err;
+            if (err !=null && err.code != 'ENOENT') console.log(err);
             console.log('successfully deleted'+input.filename);
 		});
     });
