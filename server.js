@@ -24,10 +24,16 @@ app.post('/allocate',function(req,res){
 				res.send("Failure ....");
 			}
 			else{
-				database.checkdb(info,function(status){
-					res.write(status+"\n");
-					res.write("OK...\n");
-					res.write("Bye...");
+                    database.checkdb(info,function(status,deletefile){
+                    res.write(status+"\n");
+                    res.write("OK...\n");
+                    res.write("Bye...");
+					if(deletefile===1){
+                        fs.unlink('/tftpboot/'+info.filename, function(err){
+                            if (err !==null && err.code != 'ENOENT') console.log(err);
+                            console.log('successfully deleted'+info.filename);
+                        });
+                    }
 					res.end();
 				});
 			}

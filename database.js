@@ -19,34 +19,36 @@ function checkdb(input,callback) {
 	var pool = mysql.createPool(auth);
 	pool.getConnection(function(err,connection) {
 		if(err !== null)
-			return callback('Error connecting to mysql:' + err+'\n');
+		return callback('Error connecting to mysql:' + err+'\n',1);
 		else
 			UserQuery(connection, query.check_user, function(status)	{
-                if (status === 0) return callback(err_msg);
-				if(status == 2) return callback('Why this kolaveri ??? You already connected to a board. Terminate the session before requesting for a new one....');
+                if (status === 0)
+                return callback(err_msg,1);
+				if(status == 2) 
+				return callback('Why this kolaveri ??? You already connected to a board. Terminate the session before requesting for a new one....',1);
 				else    {
 					BoardQuery(connection, query.free_board, function(err, board)	{
-                        if(err !== null) return callback(err_msg);
+                        if(err !== null) return callback(err_msg,1);
                         else {
                             var temp = "select boardip,min(portno) as portno from b_mng.b_status where logged=0 and working=1 and boardip='"+board+"' LIMIT 1;";
                             info.boardip = board;
                             FindBoardQuery(connection, temp, function(err, port)	{
-                                if(err !== null) return callback(err_msg);
+                                if(err !== null) return callback(err_msg,1);
                                 else    {
                                 info.portno = port;
                                 temp = "update b_mng.b_status set logged=1,userid='"+input.userid+"',collegeip='"+input.collip+"',intime=now() where boardip='"+board+"' and portno="+port+" and logged=0;";
                                 UpdateTableQuery(connection, temp, function(err)	{
-                                    if(err !== null) return callback(err_msg);
+                                    if(err !== null) return callback(err_msg,1);
                                     else    {
                                     temp = "select date_format(Intime,'%Y-%m-%d %T') as time1 from b_mng.b_status where boardip='"+board+"' and portno="+port+";";
                                     GetIntimeQuery(connection, temp, function(err, intime)	{
-                                        if(err !== null) return callback(err_msg);
+                                        if(err !== null) return callback(err_msg,1);
                                         else    {
                                         info.intime = intime;
                                         file.load(connection, info, input);
                                         ipfwd.allow(info, input);
                                         }
-                                        return callback("Start debugging....You have 5 minutes....Remember to terminate the session once done.....");
+                                        return callback("Start debugging....You have 5 minutes....Remember to terminate the session once done.....",0);
                                     });}
                                 });}
                             });}
