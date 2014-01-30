@@ -20,21 +20,14 @@ function ftransfer(connection, info, input){
                     console.log('stderr: ' + data);
                 });
 		kill.stdin.end();
-		connection.query("update b_mng.b_status set logged=0,userid=NULL,collegeip=NULL,intime=NULL where boardip='"+info.boardip+"' and portno="+info.portno+";", function(err,res){
-			if(err!==null)   console.log(err);
-			connection.release();
-		});
-		ipfwd.drop(info,input);
-		fs.unlink('/tftpboot/'+input.filename, function (err) {
-            if (err !==null && err.code != 'ENOENT') console.log(err);
-            console.log('successfully deleted'+input.filename);
-		});
+		ls.kill("SIGHUP");
 		
 	}, 300000);
 	ls.stdin.write(echo_cmd);
 	ls.stdout.on('data', function (data) {
         console.log("stdout:"+data);
-	if(data == 'TERM\n') ls.kill('SIGHUP');
+	if(data == 'Killing inferior\n' || data == '153\nGDBserver exiting\n')
+		ls.kill('SIGHUP');
 	});
 	ls.stderr.on('data', function (data) {
 		console.log('stderr: ' + data);
