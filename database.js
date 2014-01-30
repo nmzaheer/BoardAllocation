@@ -29,6 +29,7 @@ function checkdb(input,callback) {
 				else    {
 					BoardQuery(connection, query.free_board, function(err, board)	{
                         if(err !== null) return callback(err_msg,1);
+			if(board === 0) return callback("Boards are busy....Better try after some time.....Have fun waiting.....",1);
                         else {
                             var temp = "select boardip,min(portno) as portno from b_mng.b_status where logged=0 and working=1 and boardip='"+board+"' LIMIT 1;";
                             info.boardip = board;
@@ -72,8 +73,8 @@ function UserQuery(connection, query, callback)	{
 
 function BoardQuery(connection, query, callback)	{
 	connection.query(query, function(err, rows)	{
-		if(err !== null)
-			callback(err, 0);
+	if(!rows[0] || err!==null){
+			callback(err, 0);}
 		else
 			callback(err, rows[0].boardip);
 	});			
