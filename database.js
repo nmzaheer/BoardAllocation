@@ -25,7 +25,7 @@ function checkdb(input,callback) {
                 if (status === 0)
                 return callback(err_msg,1);
 				if(status == 2) 
-				return callback('You are already connected to a board. Please terminate the session before requesting for a new one....',1);
+					return callback('You are already connected to a board. Please terminate the session before requesting for a new one....',1);
 				else    {
 					BoardQuery(connection, query.free_board, function(err, board)	{
                         if(err !== null) return callback(err_msg,1);

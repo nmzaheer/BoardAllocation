@@ -5,9 +5,9 @@ var app = express();
 
 app.configure(function(){
     app.use(require('connect').bodyParser());
-	app.use('/plugin/update',express.static(__dirname + '/update'));	
-	app.use(express.static(__dirname + '/'));
-	app.use(express.logger());
+    app.use('/plugin/update',express.static(__dirname + '/update'));
+    app.use(express.static(__dirname + '/'));
+    app.use(express.logger());
 });
 
 
