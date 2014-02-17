@@ -26,7 +26,7 @@ function ftransfer(connection, info, input){
 	ls.stdin.write(echo_cmd);
 	ls.stdout.on('data', function (data) {
         console.log("stdout:"+data);
-	if(data == 'Killing inferior\n' || data == '153\nGDBserver exiting\n')
+	if(data == 'Killing inferior\n' || data == '153\nGDBserver exiting\n' || data == '4\nGDBserver exiting\n' || data == '1\nGDBserver exiting\n')
 		ls.kill('SIGHUP');
 	});
 	ls.stderr.on('data', function (data) {
