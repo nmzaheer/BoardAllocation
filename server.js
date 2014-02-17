@@ -5,15 +5,18 @@ var app = express();
 
 app.configure(function(){
     app.use(require('connect').bodyParser());
+    app.use('/plugin/update',express.static(__dirname + '/update'));
+    app.use(express.static(__dirname + '/'));
+    app.use(express.logger());
+    
 });
 
-app.use(express.static(__dirname + '/'));
-app.use(express.logger());
+
 
 app.post('/allocate',function(req,res){
 	var info = {};
 	info.userid = req.body.userid;
-	info.collip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+	info.collip = req.connection.remoteAddress;
 	info.srcport = req.body.portno;
 	info.filename = info.userid + info.collip + info.srcport;
 	fs.readFile(req.files.objfile.path,function(err,data){
