@@ -4,6 +4,7 @@
     	"dependencies": {
 		    "express": "3.4",
 		    "connect": "2.12",
-		    "iptables": "0.0.4"
+		    "iptables": "0.0.4",
+		    "winston": "latest"
 	}
 }
